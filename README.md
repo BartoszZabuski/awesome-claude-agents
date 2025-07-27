@@ -34,12 +34,21 @@ git clone https://github.com/bootstrapguru/awesome-claude-agents.git
 cp -r awesome-claude-agents/agents ~/.claude/
 ```
 
-### 2. Configure for Your Project
+### 2. Configure for Your Project (Optional but Recommended)
+
+While agents work automatically without configuration, adding a `CLAUDE.md` file to your project enables:
+- **Better context awareness** - Agents understand your specific tech stack
+- **Optimized routing** - Faster specialist selection based on your needs  
+- **Project standards** - Enforces your team's coding conventions
+- **Custom workflows** - Tailored agent coordination for your architecture
+
 Let Claude analyze your project and set up the perfect team:
 
 ```bash
 claude "Analyze project, detect tech stack, configure CLAUDE.md with optimal agents and routing rules from ~/.claude/agents/. Map tasks to specialists: API endpoints, frontend components, database queries, performance optimization. Use framework-specific agents when available, universal fallbacks otherwise."
 ```
+
+**Note:** Even without a CLAUDE.md file, agents will still work! The orchestrator automatically detects your project context and routes to appropriate specialists. The configuration file just makes this process more efficient and tailored to your specific needs.
 
 ### 3. Start Building
 ```bash

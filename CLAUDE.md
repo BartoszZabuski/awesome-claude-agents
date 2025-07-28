@@ -6,7 +6,7 @@ This file configures how Claude should assist with this AWS-focused TypeScript/N
 
 ### Technology Stack
 - **Primary Language**: TypeScript
-- **Runtime**: Node.js 20.x
+- **Runtime**: Node.js 22.x
 - **Cloud Provider**: AWS
 - **Infrastructure as Code**: AWS CDK v2
 - **Frontend Framework**: React 18.x

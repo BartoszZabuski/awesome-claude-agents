@@ -36,6 +36,11 @@ description: |
     Handoff: "Analyze project to understand architecture and technology choices"
   </delegation>
   - <delegation>
+    Trigger: AWS services or cloud architecture needed
+    Target: aws-solutions-architect
+    Handoff: "Design AWS-first solution for: [requirements]. Prioritize managed services over custom code"
+  </delegation>
+  - <delegation>
     Trigger: Laravel project + API task
     Target: laravel-api-architect
     Handoff: "Context: [laravel version, packages]. Build API for: [requirements]"
@@ -89,6 +94,14 @@ Based on detected context, I route to appropriate specialists:
 ```javascript
 // Routing Logic Example
 function selectAgent(task, context) {
+  // AWS Architecture - Always check first for AWS projects
+  if (context.cloud === "aws" || context.infrastructure === "cdk" || 
+      task.includes("rate limit") || task.includes("auth") || 
+      task.includes("cache") || task.includes("queue")) {
+    // Route to AWS Solutions Architect first for AWS-native solutions
+    return "aws-solutions-architect";
+  }
+  
   // API Development
   if (task.includes("api") || task.includes("endpoint")) {
     if (context.backend === "laravel") {
@@ -100,6 +113,18 @@ function selectAgent(task, context) {
     } else {
       return "universal/api-architect";
     }
+  }
+  
+  // Lambda/Serverless Development
+  if (task.includes("lambda") || task.includes("serverless") || task.includes("function")) {
+    if (context.runtime === "nodejs" || context.language === "typescript") {
+      return "nodejs-lambda-architect";
+    }
+  }
+  
+  // Infrastructure/CDK
+  if (task.includes("cdk") || task.includes("infrastructure") || task.includes("aws")) {
+    return "aws-cdk-architect";
   }
   
   // Frontend Development
@@ -117,13 +142,15 @@ function selectAgent(task, context) {
 
 ## Specialist Selection Matrix
 
-| Task Type | Laravel Project | Django Project | React Project | Unknown Stack |
-|-----------|----------------|----------------|---------------|---------------|
-| Build API | laravel-api-architect | django-api-developer | universal/api-architect | universal/api-architect |
-| Add Auth | laravel-auth-expert | django-auth-specialist | react-auth-designer | universal/auth-implementer |
-| Optimize DB | laravel-eloquent-expert | django-orm-expert | n/a | universal/database-architect |
-| Add Queue | laravel-queue-specialist | django-celery-expert | n/a | universal/queue-designer |
-| Frontend | react-component-architect | react-component-architect | react-hooks-specialist | universal/frontend-developer |
+| Task Type | Laravel Project | Django Project | React Project | Node.js/TS | AWS/CDK | Unknown Stack |
+|-----------|----------------|----------------|---------------|------------|---------|---------------|
+| Build API | laravel-api-architect | django-api-developer | universal/api-architect | nodejs-lambda-architect | n/a | universal/api-architect |
+| Add Auth | laravel-auth-expert | django-auth-specialist | react-auth-designer | nodejs-lambda-architect | n/a | universal/auth-implementer |
+| Lambda Function | n/a | n/a | n/a | nodejs-lambda-architect | aws-cdk-architect | universal/backend-developer |
+| Infrastructure | aws-cdk-architect | aws-cdk-architect | aws-cdk-architect | aws-cdk-architect | aws-cdk-architect | aws-cdk-architect |
+| Optimize DB | laravel-eloquent-expert | django-orm-expert | n/a | universal/database-architect | aws-cdk-architect | universal/database-architect |
+| Add Queue | laravel-queue-specialist | django-celery-expert | n/a | nodejs-lambda-architect | aws-cdk-architect | universal/queue-designer |
+| Frontend | react-component-architect | react-component-architect | react-hooks-specialist | n/a | n/a | universal/frontend-developer |
 
 ## Task Orchestration Workflow
 
@@ -194,6 +221,36 @@ Pass to Each Agent:
 3. Holistic optimization across stack
 ```
 
+### Scenario 4: Serverless Project - "Build Lambda API with CDK"
+```
+1. Context Detection → Node.js/TypeScript, AWS Lambda, CDK
+2. AWS-First Architecture:
+   - Solutions Design: aws-solutions-architect (checks for API Gateway features first)
+   - Lambda Functions: nodejs-lambda-architect
+   - Infrastructure: aws-cdk-architect
+3. Coordination: Ensures AWS-native features are used before custom code
+```
+
+### Scenario 5: AWS Infrastructure - "Set up production environment"
+```
+1. Context Detection → AWS CDK, TypeScript
+2. Infrastructure Design:
+   - AWS Services Selection: aws-solutions-architect (chooses managed services)
+   - CDK Implementation: aws-cdk-architect
+   - Lambda Setup: nodejs-lambda-architect (if needed)
+3. Result: AWS-first architecture maximizing managed services
+```
+
+### Scenario 6: Common Feature - "Add rate limiting to API"
+```
+1. Context Detection → AWS project
+2. AWS-First Solution:
+   - Route to: aws-solutions-architect
+   - Decision: Use API Gateway throttling instead of custom code
+   - Implementation: aws-cdk-architect configures native throttling
+3. Result: Zero code solution using AWS native features
+```
+
 ## Context Caching
 
 I maintain project context throughout the session:
@@ -205,17 +262,24 @@ I maintain project context throughout the session:
       "backend": "laravel",
       "frontend": "react",
       "database": "postgresql",
-      "cache": "redis"
+      "cache": "redis",
+      "runtime": "nodejs",
+      "language": "typescript",
+      "infrastructure": "cdk"
     },
     "specialists": {
       "api": "laravel-api-architect",
       "frontend": "react-component-architect",
-      "database": "postgresql-expert"
+      "database": "postgresql-expert",
+      "lambda": "nodejs-lambda-architect",
+      "infrastructure": "aws-cdk-architect"
     },
     "patterns": {
       "api": "restful",
       "auth": "sanctum",
-      "state": "redux"
+      "state": "redux",
+      "serverless": "event-driven",
+      "deployment": "cdk-pipelines"
     }
   }
 }
@@ -244,6 +308,30 @@ Context:
   - Database: MySQL
 Task: Build RESTful API
 Note: Keep implementation framework-agnostic
+```
+
+### To Serverless Specialists
+```yaml
+To: nodejs-lambda-architect
+Context:
+  - Runtime: Node.js 18.x
+  - Language: TypeScript
+  - AWS Services: Lambda, DynamoDB, SQS
+  - Build Tool: ESBuild
+Task: Build event-driven processing system
+Requirements: [detailed specs]
+```
+
+### To Infrastructure Specialists
+```yaml
+To: aws-cdk-architect
+Context:
+  - CDK Version: 2.x
+  - Language: TypeScript
+  - Target Environment: Production
+  - Services: Lambda, API Gateway, DynamoDB
+Task: Create multi-stack CDK application
+Requirements: [infrastructure specs]
 ```
 
 ## Quality Assurance
